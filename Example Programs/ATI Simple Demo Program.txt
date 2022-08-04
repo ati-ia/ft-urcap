@@ -1,0 +1,48 @@
+ Program
+   BeforeStart
+     Move to Initial start position
+       MoveJ
+         'CAUTION: check reachability or edit Waypoint before running Demo!'
+         Start
+     FT Sensor: Enabled
+     'Initialize variable for use in thread'
+     ATI_FT_rawdata≔ati_ftsensor.get_raw_ft()
+   Robot Program
+     Bias the sensor
+       Wait: 0.5
+       FT Sensor: Bias
+       Wait: 0.5
+     'This Demo program shows multiple ways to read F/T data for a "Force Search" in Z direction'
+     METHOD 1: Read F/T data via native UR command
+       MoveL
+         'Move down until the tool touches a surface'
+         If force()<2
+           RelativeMotionZ
+         'Wait, then return to the start position'
+         Wait: 1.0
+         Start
+     METHOD 2: Read raw F/T data via ATI F/T URCap command
+       MoveL
+         'Move down until the tool touches a surface'
+         If ATI_FT_Fz>-2
+           RelativeMotionZ
+         'Wait, then return to the start position'
+         Wait: 1.0
+         Start
+   Thread_1
+     'MONITOR THIS DATA DURING PROGRAM FROM "Variables" TAB'
+     Wait: 0.01
+     'Read sensor F/T Data using F/T URCap command, & assign it to a variable.'
+     'This is the raw data directly from the sensor, in the sensor coordinate frame.'
+     'With every loop of the thread, update the raw F/T data reading.'
+     ATI_FT_rawdata≔ati_ftsensor.get_raw_ft()
+     'Fz is the 3rd element of the ATI_FT_data variable.'
+     'NOTE: Pressing sensor in Z causes a -Z force (if no sensor Tool Transform applied)'
+     ATI_FT_Fz≔ATI_FT_rawdata[2]
+     'F/T sensor data can also be read from native UR commands.'
+     'Data read from UR commands will have transformations applied.'
+     '(it is in robot base frame, not in the sensor coordinate frame).'
+     ' UR Command get_tcp_force() gives TCP force in coordinate frame of robot base.'
+     FTinBaseFrame≔get_tcp_force()
+     'UR command force() gives the Norm of get_tcp_force().'
+     ForceNorm≔force()

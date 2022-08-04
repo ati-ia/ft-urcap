@@ -1,0 +1,115 @@
+ Program
+   BeforeStart
+     Move to Initial start position
+       MoveJ
+         'CAUTION: check reachability or edit Waypoint before running Demo!'
+         Start
+     FT Sensor: Enabled
+     'Initialize variable for use in Thread:'
+     'In this example, we name the variable ATI_FT_data.'
+     ATI_FT_rawdata≔ati_ftsensor.get_raw_ft()
+   Robot Program
+     Bias the sensor
+       Wait: 0.5
+       FT Sensor: Bias
+       Wait: 0.5
+     'This Demo program shows multiple ways to search & monitor forces (without UR Force Mode)'
+     'and program offset motion with UR Force Mode.'
+     METHOD 1
+       Move down until the tool touches a surface
+         'Monitor Norm of Forces (in robot base coordinate frame)'
+         MoveL
+           If ForceNorm<2
+             RelativeMotionZ
+       Move across the surface while applying 10N of force
+         'Use "Simple" type UR Force Control'
+         Force
+           MoveL
+             Wait: 1.0
+             (Optional IF) Stop if the tool encounters too much resistance or hits wall.
+               If xyPlaneForce < 10
+                 RelativeMotionY
+         Reset to a start position
+           MoveL
+             Up
+             'firstUp'
+             Start
+     Reset to a start position
+       MoveL
+         Start
+     METHOD 2
+       Move down until the tool touches a surface
+         'Monitor Norm of Forces (in robot base coordinate frame)'
+         MoveL
+           If ForceNorm<2
+             RelativeMotionZ
+       Move across the surface while applying 10N of down force & 0N of side force
+         'Use "Motion" type UR Force Control with only Z compliance'
+         Force
+           MoveL
+             Wait: 1.0
+             (Optional IF) Stop if the tool encounters too much resistance or hits wall.
+               If xyPlaneForce < 10
+                 RelativeMotionY
+         Reset to a start position
+           MoveL
+             Up
+             'firstUp'
+             Start
+     Reset to a start position
+       MoveL
+         Start
+     METHOD 3
+       Move down until the tool touches a surface
+         'Monitor Norm of Forces (in robot base coordinate frame)'
+         MoveL
+           If ForceNorm<2
+             RelativeMotionZ
+       Move across the surface while applying 10N of force
+         'Use "Motion" type UR Force Control with Y & Z compliance, only push in Z'
+         Force
+           MoveL
+             Wait: 1.0
+             (Optional IF) Stop if the tool encounters too much resistance or hits wall.
+               If xyPlaneForce < 10
+                 RelativeMotionY
+         Reset to a start position
+           MoveL
+             Up
+             'firstUp'
+             Start
+     Reset to a start position
+       MoveL
+         Start
+     METHOD 4
+       Move down until the tool touches a surface
+         'Monitor raw FT sensor readings (in sensor coordinate frame)'
+         MoveL
+           If ATI_FT_Fz>-2
+             RelativeMotionZ
+         Wait: 2.0
+       '(Optional) Insert a UR Force Mode command to move across the surface, as shown in Methods above.'
+       Reset to a start position
+         MoveL
+           Up
+           'secondUp'
+           Start
+   Thread_1
+     'MONITOR THIS DATA DURING PROGRAM FROM "Variables" TAB'
+     Wait: 0.01
+     'Read sensor F/T Data using F/T URCap command, & assign it to a variable.'
+     'This is the raw data directly from the sensor, in the sensor coordinate frame.'
+     'With every loop of the thread, update the raw F/T data reading.'
+     ATI_FT_rawdata≔ati_ftsensor.get_raw_ft()
+     'Fz is the 3rd element of the ATI_FT_data variable.'
+     'NOTE: Pressing sensor in Z causes a -Z force (if no sensor Tool Transform applied)'
+     ATI_FT_Fz≔ATI_FT_rawdata[2]
+     'F/T sensor data can also be read from native UR commands.'
+     'Data read from UR commands will have transformations applied.'
+     '(it is in robot base frame, not in the sensor coordinate frame).'
+     ' UR Command get_tcp_force() gives TCP force in coordinate frame of robot base.'
+     FTinBaseFrame≔get_tcp_force()
+     'UR command force() gives the Norm of get_tcp_force().'
+     ForceNorm≔force()
+     Get magnitude of force in just the X-Y plane, accounting for friction of tool
+       xyPlaneForce≔sqrt(pow(FTinBaseFrame[0], 2) + pow(FTinBaseFrame[1], 2)) - 0.3*ForceNorm

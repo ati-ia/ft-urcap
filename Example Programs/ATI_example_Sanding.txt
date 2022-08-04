@@ -1,0 +1,61 @@
+ Program
+   BeforeStart
+     Move to Initial start position
+       'Set Actual Robot Payload (enter your TCP payload)'
+       set_payload(1)
+       'Move to a Start Position (reteach this point to a safe home location!)'
+       MoveJ
+         Start
+       Wait: 0.01
+       FT Sensor: Enabled
+       'Use Options to adjust Filter for your sander vibrations'
+       FT Sensor: Options
+       'Adjust sensitivity of UR Force mode'
+       force_mode_set_damping(1)
+       force_mode_set_gain_scaling(.5)
+   Robot Program
+     Bias the sensor
+       Wait: 1.0
+       FT Sensor: Bias
+     Move down until the tool touches a surface
+       MoveJ
+         'Move to hover above surface (reteach to a point ~5cm above surface)'
+         AboveTable
+       If ATI_ZForce>-2
+         'Relative motion in Z'
+         movel(pose_trans(get_actual_tcp_pose(),p[0,0,.2,0,0,0]),a=0.05,v=.04,t=0,r=0)
+     Move across the surface while applying 2N of force
+       Force
+         If the tool encounters too much resistance, return to start position
+           If xyPlaneForce <20
+             'Relative motion 0.3m in -Y'
+             movel(pose_trans(get_actual_tcp_pose(), p[0,-.3,0,0,0,0]),a=0.04,v=.02,t=0,r=0)
+     Reset to a start position
+       'Relative motion in Z'
+       movel(pose_trans(get_actual_tcp_pose(), p[0,0,-.2,0,0,0]),a=0.04,v=.1,t=0,r=0)
+     Move down until the tool touchs a surface
+       If ATI_ZForce>-2
+         'Relative motion in Z'
+         movel(pose_trans(get_actual_tcp_pose(),p[0,0,.2,0,0,0]),a=0.05,v=.04,t=0,r=0)
+     Move across the surface while applying 2N of force
+       Force
+         If the tool encounters too much resistance, return to start position
+           If xyPlaneForce <20
+             'Relative motion 0.3m in +Y'
+             movel(pose_trans(get_actual_tcp_pose(), p[0,.3,0,0,0,0]),a=0.04,v=.02,t=0,r=0)
+     Reset to a start position
+       movel(pose_trans(get_actual_tcp_pose(), p[0,0,-.2,0,0,0]),a=0.04,v=.1,t=0,r=0)
+       MoveJ
+         Start
+   Thread_1
+     'UR Command get_tcp_force() is transformed to Base'
+     TCPForce≔get_tcp_force()
+     'ATI reading in the sensor frame'
+     ATI_rawFT≔ati_ftsensor.get_raw_ft()
+     'Adjust the TCP offset parameters for your tool!'
+     'ATI reading in the TCP frame: TCP is .5m offset in Z from the sensor measuring face'
+     ATI_TCP_FT≔ati_ftsensor.get_tcp_ft(0, 0, .5, 0, 0, 0)
+     ATI_ZForce≔ATI_TCP_FT[2]
+     Get magnitude of force in X-Y plane, accounting for friction of tool
+       xyPlaneForce≔sqrt(pow(TCPForce[0], 2) + pow(TCPForce[1], 2)) - 0.3*ATI_ZForce
+     Wait: 0.01
