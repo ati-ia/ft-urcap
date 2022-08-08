@@ -12,7 +12,8 @@
        FT Sensor: Options
        'Adjust sensitivity of UR Force mode'
        force_mode_set_damping(1)
-       force_mode_set_gain_scaling(.5)
+       'Gain scaling is available for E Series robots'
+       'force_mode_set_gain_scaling(0.5)'
    Robot Program
      Bias the sensor
        Wait: 1.0
@@ -30,7 +31,7 @@
            If xyPlaneForce <20
              'Relative motion 0.3m in -Y'
              movel(pose_trans(get_actual_tcp_pose(), p[0,-.3,0,0,0,0]),a=0.04,v=.02,t=0,r=0)
-     Reset to a start position
+     Reset to a starting position for next motion
        'Relative motion in Z'
        movel(pose_trans(get_actual_tcp_pose(), p[0,0,-.2,0,0,0]),a=0.04,v=.1,t=0,r=0)
      Move down until the tool touchs a surface
@@ -43,7 +44,7 @@
            If xyPlaneForce <20
              'Relative motion 0.3m in +Y'
              movel(pose_trans(get_actual_tcp_pose(), p[0,.3,0,0,0,0]),a=0.04,v=.02,t=0,r=0)
-     Reset to a start position
+     Reset to a starting position for next motion
        movel(pose_trans(get_actual_tcp_pose(), p[0,0,-.2,0,0,0]),a=0.04,v=.1,t=0,r=0)
        MoveJ
          Start
@@ -53,7 +54,7 @@
      'ATI reading in the sensor frame'
      ATI_rawFT≔ati_ftsensor.get_raw_ft()
      'Adjust the TCP offset parameters for your tool!'
-     'ATI reading in the TCP frame: TCP is .5m offset in Z from the sensor measuring face'
+     'ATI reading in the TCP frame: Example TCP is .5m offset in Z from the sensor measuring face'
      ATI_TCP_FT≔ati_ftsensor.get_tcp_ft(0, 0, .5, 0, 0, 0)
      ATI_ZForce≔ATI_TCP_FT[2]
      Get magnitude of force in X-Y plane, accounting for friction of tool
