@@ -28,11 +28,10 @@
              Wait: 1.0
              (Optional IF) Stop if the tool encounters too much resistance or hits wall.
                If xyPlaneForce < 10
-                 RelativeMotionY
+                 RelativeMotionX
          Reset to a start position
            MoveL
              Up
-             'firstUp'
              Start
      Reset to a start position
        MoveL
@@ -43,18 +42,17 @@
          MoveL
            If ForceNorm<2
              RelativeMotionZ
-       Move across the surface while applying 10N of down force & 0N of side force
+       Move across the surface while applying 10N of force
          'Use "Motion" type UR Force Control with only Z compliance'
          Force
            MoveL
              Wait: 1.0
              (Optional IF) Stop if the tool encounters too much resistance or hits wall.
                If xyPlaneForce < 10
-                 RelativeMotionY
+                 RelativeMotionX
          Reset to a start position
            MoveL
              Up
-             'firstUp'
              Start
      Reset to a start position
        MoveL
@@ -65,18 +63,17 @@
          MoveL
            If ForceNorm<2
              RelativeMotionZ
-       Move across the surface while applying 10N of force
+       Move across the surface while applying 10N of down force & 0N of side force
          'Use "Motion" type UR Force Control with Y & Z compliance, only push in Z'
          Force
            MoveL
              Wait: 1.0
              (Optional IF) Stop if the tool encounters too much resistance or hits wall.
                If xyPlaneForce < 10
-                 RelativeMotionY
+                 RelativeMotionX
          Reset to a start position
            MoveL
              Up
-             'firstUp'
              Start
      Reset to a start position
        MoveL
@@ -92,7 +89,6 @@
        Reset to a start position
          MoveL
            Up
-           'secondUp'
            Start
    Thread_1
      'MONITOR THIS DATA DURING PROGRAM FROM "Variables" TAB'
