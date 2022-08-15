@@ -2,6 +2,8 @@
 
 This URCap software integrates the FT Sensor with Universal Robots' force feedback functionality, and includes example demo programs. Compatible with NET F/T systems, Ethernet Axia, and Serial Axia. Compatible with UR CB and E-Series.
 
+To download without using Git, click the green "code" button, then "Download ZIP"
+
 ## F/T URCap v2.7.8 Release Notes
 
 - Combined URCap for E-series and CB compatibility into single URCap
